@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middleware/upload');
+const {upload,uploadForExcel} = require('../middleware/upload');
 
 // Import controllers
 const authController = require('../controllers/authController');
@@ -18,15 +18,13 @@ router.post('/api/logout', authController.logout);
 router.post('/api/addEmployee', upload.single('photo'), employeeController.addEmployee);
 router.get('/api/employees', employeeController.getAllEmployees);
 router.get('/api/employees/:id', employeeController.getEmployeeById);
-router.put('/api/employees/:id',upload.single('photo'), employeeController.updateEmployee);
+router.put('/api/employees/:id', upload.single('photo'), employeeController.updateEmployee);
 router.delete('/api/employees/:id', employeeController.deleteEmployee);
 
-// User routes (if needed)
-router.get('/api/users', userController.getAllUsers);
-router.get('/api/users/:id', userController.getUserById);
 
 // Excel-related routes
-router.post('/upload', excelController.uploadExcel);
+router.post('/upload', uploadForExcel.single('file'), excelController.uploadExcel);
 router.get('/export/employees', excelController.exportEmployees);
+router.get('/export/downloadEmpl', excelController.downloadEmpl)
 
 module.exports = router;

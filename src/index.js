@@ -1,8 +1,6 @@
-// src/index.js
 const express = require('express');
 const routes = require('./routes/userRoutes');
 const connectDB = require('./config/db');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const PORT = process.env.PORT || 3000;
@@ -10,8 +8,9 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 app.use(cors());
+
+// Middleware for logging requests
 app.use((req, res, next) => {
     console.log(`Received request: ${req.method} ${req.url}`);
     next();

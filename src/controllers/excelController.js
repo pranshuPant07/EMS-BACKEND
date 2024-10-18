@@ -1,7 +1,7 @@
 const XLSX = require('xlsx');
 const User = require('../models/user'); // Adjust the import according to your user model
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
+const PDFDocument = require('pdfkit');
 
 // Configure multer for Excel file handling
 const storageForExcel = multer.memoryStorage();
@@ -26,7 +26,7 @@ const formatDate = (dateInput) => {
 };
 
 // Upload employee data from Excel sheet
-exports.uploadExcel = uploadForExcel.single('file'), async (req, res) => {
+exports.uploadExcel = async (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
@@ -37,12 +37,14 @@ exports.uploadExcel = uploadForExcel.single('file'), async (req, res) => {
         const sheet = workbook.Sheets[sheetName];
         const data = XLSX.utils.sheet_to_json(sheet);
 
+        // Process the data from the Excel file
         const processedData = data.map(row => {
             if (row.Dateofjoin) {
                 const serialDate = row.Dateofjoin;
                 const date = excelSerialDateToJSDate(serialDate);
                 row.Dateofjoin = formatDate(date.toISOString());
             }
+            // Validate mobile number length
             row.isValid = row.Mobilenumber && row.Mobilenumber.toString().length === 10;
             return row;
         });
@@ -125,5 +127,37 @@ exports.exportEmployees = async (req, res) => {
     } catch (error) {
         console.error('Error exporting data:', error);
         res.status(500).send('Error exporting data');
+    }
+};
+
+// Function to download employee data as a PDF
+
+exports.downloadEmpl = async (req, res) => {
+    try {
+        const employees = await User.find();
+
+        const doc = new PDFDocument();
+
+        res.setHeader('Content-Disposition', 'attachment; filename=employees.pdf');
+        res.setHeader('Content-Type', 'application/pdf');
+
+        doc.pipe(res);
+
+        doc.fontSize(18).text('Employee List', { align: 'center' });
+        doc.moveDown();
+
+        employees.forEach((employee, index) => {
+            doc.fontSize(12).text(
+                `${index + 1}. Name: ${employee.Name}\n` +
+                `   Mobile Number: ${employee.Mobilenumber}\n` +
+                `   Date of Join: ${employee.Dateofjoin}\n` +
+                `   Department: ${employee.Department}\n`
+            );
+        });
+
+        doc.end();
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        res.status(500).send('Internal Server Error');
     }
 };

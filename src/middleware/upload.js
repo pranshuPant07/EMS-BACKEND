@@ -17,4 +17,14 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // Limit to 5MB
 });
 
-module.exports = upload;
+const storageForExcel = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/'); // Ensure this folder exists
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + path.extname(file.originalname));
+    },
+  });
+  const uploadForExcel = multer({ storageForExcel });
+
+module.exports = {upload, uploadForExcel};
