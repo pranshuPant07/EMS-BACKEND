@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {upload,uploadForExcel} = require('../middleware/upload');
+const { upload, uploadForExcel } = require('../middleware/upload');
 
 // Import controllers
 const authController = require('../controllers/authController');

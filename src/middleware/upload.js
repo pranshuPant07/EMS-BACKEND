@@ -19,12 +19,13 @@ const upload = multer({
 
 const storageForExcel = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, 'uploads/'); // Ensure this folder exists
+        cb(null, 'src/uploads/'); // Ensure this folder exists
     },
     filename: function (req, file, cb) {
-      cb(null, Date.now() + path.extname(file.originalname));
+        cb(null, Date.now() + path.extname(file.originalname));
     },
-  });
-  const uploadForExcel = multer({ storageForExcel });
+});
 
-module.exports = {upload, uploadForExcel};
+const uploadForExcel = multer({ storage: storageForExcel });
+
+module.exports = { upload, uploadForExcel };
