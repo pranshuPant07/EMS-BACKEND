@@ -1,6 +1,6 @@
-const userData = require('../models/user'); // Adjust the import according to your user model
-const bcrypt = require('bcrypt'); // To hash passwords
-const jwt = require('jsonwebtoken'); // For JWT authentication
+const userData = require('../models/user');
+const bcrypt = require('bcrypt'); 
+const jwt = require('jsonwebtoken');
 const UserData = require('../models/login');
 
 // Register a new user

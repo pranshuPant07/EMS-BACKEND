@@ -70,31 +70,20 @@ exports.uploadExcel = async (req, res) => {
         const existingEmployees = await User.find({ Mobilenumber: { $in: mobileNumbers } }).exec();
         const existingNumbers = new Set(existingEmployees.map(emp => emp.Mobilenumber));
 
-        const finalValidEmployees = [];
-        const finalInvalidEmployees = [];
-
-        for (const employee of validEmployees) {
-            if (existingNumbers.has(employee.Mobilenumber)) {
-                finalInvalidEmployees.push(employee);
-            } else {
-                finalValidEmployees.push(employee);
-            }
-        }
+        const finalValidEmployees = validEmployees.filter(employee => !existingNumbers.has(employee.Mobilenumber));
+        const finalInvalidEmployees = [...invalidEmployees, ...validEmployees.filter(employee => existingNumbers.has(employee.Mobilenumber))];
 
         // Save only the valid employees to MongoDB
         if (finalValidEmployees.length > 0) {
             await User.insertMany(finalValidEmployees, { ordered: false });
         }
 
-        // Combine invalid employees and those with duplicates
-        const combinedInvalidEmployees = [...invalidEmployees, ...finalInvalidEmployees];
-
         res.json({
-            invalidEmployees: combinedInvalidEmployees,
+            invalidEmployees: finalInvalidEmployees,
             duplicates: Array.from(duplicates),
             insertedCount: finalValidEmployees.length,
             totalRecords: processedData.length,
-            errorMessage: combinedInvalidEmployees.length > 0 ? 'Some records are invalid, including duplicates' : null
+            errorMessage: finalInvalidEmployees.length > 0 ? 'Some records are invalid, including duplicates' : null
         });
 
     } catch (error) {
@@ -134,7 +123,6 @@ exports.exportEmployees = async (req, res) => {
 };
 
 // Function to download employee data as a PDF
-
 exports.downloadEmpl = async (req, res) => {
     try {
         const employees = await User.find();
