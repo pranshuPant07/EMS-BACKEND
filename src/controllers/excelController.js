@@ -81,10 +81,12 @@ exports.uploadExcel = async (req, res) => {
             }
         }
 
+        // Save only the valid employees to MongoDB
         if (finalValidEmployees.length > 0) {
             await User.insertMany(finalValidEmployees, { ordered: false });
         }
 
+        // Combine invalid employees and those with duplicates
         const combinedInvalidEmployees = [...invalidEmployees, ...finalInvalidEmployees];
 
         res.json({
@@ -99,6 +101,7 @@ exports.uploadExcel = async (req, res) => {
         res.status(500).send('Error processing file: ' + error.message);
     }
 };
+
 
 // Function to export employee data to Excel
 exports.exportEmployees = async (req, res) => {
