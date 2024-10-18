@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
     },
     Photo: {
         type: String,
-        required: [true, "Photo is required"] 
+        // required: [true, "Photo is required"] 
     }
 });
 
