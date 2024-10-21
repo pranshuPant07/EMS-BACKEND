@@ -32,7 +32,14 @@ exports.uploadExcel = async (req, res) => {
     }
 
     try {
+        console.log('Uploaded file:', req.file);
         const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+
+        console.log('Workbook:', workbook);
+        if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+            return res.status(400).send('The uploaded Excel file has no sheets.');
+        }
+
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const data = XLSX.utils.sheet_to_json(sheet);

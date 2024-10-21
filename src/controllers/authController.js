@@ -1,5 +1,5 @@
 const userData = require('../models/user');
-const bcrypt = require('bcrypt'); 
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const UserData = require('../models/login');
 
@@ -71,8 +71,8 @@ exports.verify = async (req, res) => {
   // Check if the code is provided
   if (!code) {
     return res.status(400).send({ message: "Enter verification code first" });
-  } else if( code.length < 4){
-    return res.status(400).send({message: "Code must be 4 digits"})
+  } else if (code.length < 4) {
+    return res.status(400).send({ message: "Code must be 4 digits" })
   }
 
   // Check if the code matches the expected verification code
