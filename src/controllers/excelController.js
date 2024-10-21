@@ -33,7 +33,11 @@ exports.uploadExcel = async (req, res) => {
 
     try {
         console.log('Uploaded file:', req.file);
-        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const filePath = req.file.path;
+
+        // Read the file from the filesystem
+        const fileBuffer = fs.readFileSync(filePath);
+        const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
 
         console.log('Workbook:', workbook);
         if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
