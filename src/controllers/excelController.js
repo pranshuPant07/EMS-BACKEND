@@ -8,24 +8,6 @@ const PDFDocument = require('pdfkit');
 const storageForExcel = multer.memoryStorage();
 const uploadForExcel = multer({ storage: storageForExcel });
 
-// Function to convert Excel serial date to JavaScript date
-const excelSerialDateToJSDate = (serial) => {
-    const epoch = new Date(Date.UTC(1899, 11, 30)); // Excel's epoch start date
-    return new Date(epoch.getTime() + serial * 86400000);
-};
-
-// Function to format date
-const formatDate = (dateInput) => {
-    const date = new Date(dateInput);
-    if (isNaN(date.getTime())) {
-        throw new Error('Invalid date');
-    }
-    const day = date.getDate();
-    const month = date.toLocaleString('default', { month: 'short' });
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
-};
-
 // Upload employee data from Excel sheet
 exports.uploadExcel = async (req, res) => {
     if (!req.file) {
@@ -48,11 +30,8 @@ exports.uploadExcel = async (req, res) => {
         const data = XLSX.utils.sheet_to_json(sheet);
 
         const processedData = data.map(row => {
-            if (row.Dateofjoin) {
-                const serialDate = row.Dateofjoin;
-                const date = excelSerialDateToJSDate(serialDate);
-                row.Dateofjoin = formatDate(date.toISOString());
-            }
+            // Remove the date handling logic
+            row.Dateofjoin = row.Dateofjoin || null;
 
             const mobilenumber = row.Mobilenumber;
             row.isValid = mobilenumber && /^\d{10}$/.test(mobilenumber.toString());
@@ -92,7 +71,8 @@ exports.uploadExcel = async (req, res) => {
         const finalInvalidEmployees = [...invalidEmployees, ...validEmployees.filter(employee => existingNumbers.has(employee.Mobilenumber))];
 
         if (finalValidEmployees.length > 0) {
-            await User.insertMany(finalValidEmployees, { ordered: false });
+            const result = await User.insertMany(finalValidEmployees, { ordered: false });
+            console.log('Insert result:', result);
         }
 
         res.json({
@@ -107,8 +87,6 @@ exports.uploadExcel = async (req, res) => {
         res.status(500).send('Error processing file: ' + error.message);
     }
 };
-
-
 
 // Function to export employee data to Excel
 exports.exportEmployees = async (req, res) => {
@@ -140,7 +118,7 @@ exports.exportEmployees = async (req, res) => {
     }
 };
 
-// Function to download employee data as a PDF
+//Function to download saved employee data from DB
 exports.downloadEmpl = async (req, res) => {
     try {
         const employees = await User.find();
