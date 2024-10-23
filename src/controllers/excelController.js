@@ -9,6 +9,12 @@ const PDFDocument = require('pdfkit');
 const storageForExcel = multer.memoryStorage();
 const uploadForExcel = multer({ storage: storageForExcel });
 
+function excelSerialDateToJSDate(serial) {
+    const excelEpoch = new Date(1900, 0, 1); // Excel's epoch starts on January 1, 1900
+    const daysSinceEpoch = serial - 1; // Subtract 1 because Excel's date starts at 1
+    return new Date(excelEpoch.getTime() + daysSinceEpoch * 24 * 60 * 60 * 1000);
+}
+
 // Upload employee data from Excel sheet
 exports.uploadExcel = async (req, res) => {
     if (!req.file) {
@@ -33,11 +39,10 @@ exports.uploadExcel = async (req, res) => {
         const processedData = data.map(row => {
             // Format the Dateofjoin
             if (row.Dateofjoin) {
-                // Parse the date from Excel and format 
-                console.log(row.Dateofjoin)
-                row.Dateofjoin = moment(row.Dateofjoin).format('D MMM YYYY');
+                const date = XLSX.SSF.parse_date_code(row.Dateofjoin);
+                row.Dateofjoin = moment(`${date.y}-${date.m}-${date.d}`).format('D MMM YYYY');
             } else {
-                row.Dateofjoin = null;
+                row.Dateofjoin = null; // Handle missing date
             }
 
             const mobilenumber = row.Mobilenumber;
