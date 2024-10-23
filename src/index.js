@@ -6,9 +6,8 @@ const cors = require('cors');
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-// Configure CORS to allow your specific frontend origin
 app.use(cors({
-    origin: 'https://employee-management-system-l5bk.onrender.com' // Replace with your frontend URL
+    origin: 'https://employee-management-system-l5bk.onrender.com' 
 }));
 
 app.use(express.json());

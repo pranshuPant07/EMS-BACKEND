@@ -1,4 +1,5 @@
 const fs = require('fs');
+const moment = require('moment');
 const XLSX = require('xlsx');
 const User = require('../models/user'); // Adjust the import according to your user model
 const multer = require('multer');
@@ -30,8 +31,13 @@ exports.uploadExcel = async (req, res) => {
         const data = XLSX.utils.sheet_to_json(sheet);
 
         const processedData = data.map(row => {
-            // Remove the date handling logic
-            row.Dateofjoin = row.Dateofjoin || null;
+            // Format the Dateofjoin
+            if (row.Dateofjoin) {
+                // Parse the date from Excel and format it
+                row.Dateofjoin = moment(row.Dateofjoin).format('D MMM YYYY');
+            } else {
+                row.Dateofjoin = null;
+            }
 
             const mobilenumber = row.Mobilenumber;
             row.isValid = mobilenumber && /^\d{10}$/.test(mobilenumber.toString());
