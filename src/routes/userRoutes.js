@@ -10,7 +10,7 @@ const excelController = require('../controllers/excelController');
 
 // Authentication routes
 router.post('/api/register', authController.register);
-router.post('/', authController.check);
+router.get('/', authController.check);
 router.post('/api/login', authController.login);
 router.post('/api/verify', authController.verify);
 router.post('/api/logout', authController.logout);
