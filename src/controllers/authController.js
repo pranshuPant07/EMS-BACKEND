@@ -36,6 +36,10 @@ exports.register = async (req, res) => {
   }
 };
 
+exports.check = async (req, res) => {
+  return res.status(200).send({ message: "CONNECTED" })
+}
+
 // Login a user
 exports.login = async (req, res) => {
   const { Username, Password } = req.body;
