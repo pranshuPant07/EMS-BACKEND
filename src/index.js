@@ -8,7 +8,9 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({
+    origin: 'https://employee-management-system-l5bk.onrender.com'
+}));
 
 // Middleware for logging requests
 app.use((req, res, next) => {
