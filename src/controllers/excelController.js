@@ -33,7 +33,8 @@ exports.uploadExcel = async (req, res) => {
         const processedData = data.map(row => {
             // Format the Dateofjoin
             if (row.Dateofjoin) {
-                // Parse the date from Excel and format it
+                // Parse the date from Excel and format 
+                console.log(row.Dateofjoin)
                 row.Dateofjoin = moment(row.Dateofjoin).format('D MMM YYYY');
             } else {
                 row.Dateofjoin = null;
