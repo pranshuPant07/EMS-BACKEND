@@ -36,11 +36,9 @@ exports.uploadExcel = async (req, res) => {
         console.log('Uploaded file:', req.file);
         const filePath = req.file.path;
 
-        // Read the file from the filesystem
         const fileBuffer = fs.readFileSync(filePath);
         const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
 
-        console.log('Workbook:', workbook);
         if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
             return res.status(400).send('The uploaded Excel file has no sheets.');
         }
@@ -49,32 +47,31 @@ exports.uploadExcel = async (req, res) => {
         const sheet = workbook.Sheets[sheetName];
         const data = XLSX.utils.sheet_to_json(sheet);
 
-        // Process the data from the Excel file
         const processedData = data.map(row => {
             if (row.Dateofjoin) {
                 const serialDate = row.Dateofjoin;
                 const date = excelSerialDateToJSDate(serialDate);
                 row.Dateofjoin = formatDate(date.toISOString());
             }
-            // Validate mobile number length
-            row.isValid = row.Mobilenumber && row.Mobilenumber.toString().length === 10;
+            row.isValid = row.Mobilenumber && /^\d{10}$/.test(row.Mobilenumber.toString());
             return row;
         });
 
-        const mobileNumbers = processedData.map(employee => employee.Mobilenumber);
+        const mobileNumbers = processedData.map(employee => employee.Mobilenumber.toString().trim());
         const seenNumbers = new Set();
         const duplicates = new Set();
         const validEmployees = [];
         const invalidEmployees = [];
 
         for (const employee of processedData) {
+            const mobileNumber = employee.Mobilenumber.toString().trim();
             if (!employee.isValid) {
                 invalidEmployees.push(employee);
-            } else if (seenNumbers.has(employee.Mobilenumber)) {
-                duplicates.add(employee.Mobilenumber);
+            } else if (seenNumbers.has(mobileNumber)) {
+                duplicates.add(mobileNumber);
                 invalidEmployees.push(employee);
             } else {
-                seenNumbers.add(employee.Mobilenumber);
+                seenNumbers.add(mobileNumber);
                 validEmployees.push(employee);
             }
         }
@@ -85,7 +82,6 @@ exports.uploadExcel = async (req, res) => {
         const finalValidEmployees = validEmployees.filter(employee => !existingNumbers.has(employee.Mobilenumber));
         const finalInvalidEmployees = [...invalidEmployees, ...validEmployees.filter(employee => existingNumbers.has(employee.Mobilenumber))];
 
-        // Save only the valid employees to MongoDB
         if (finalValidEmployees.length > 0) {
             await User.insertMany(finalValidEmployees, { ordered: false });
         }
@@ -102,6 +98,7 @@ exports.uploadExcel = async (req, res) => {
         res.status(500).send('Error processing file: ' + error.message);
     }
 };
+
 
 
 // Function to export employee data to Excel
