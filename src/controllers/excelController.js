@@ -53,23 +53,32 @@ exports.uploadExcel = async (req, res) => {
                 const date = excelSerialDateToJSDate(serialDate);
                 row.Dateofjoin = formatDate(date.toISOString());
             }
-            row.isValid = row.Mobilenumber && /^\d{10}$/.test(row.Mobilenumber.toString());
+
+            const mobilenumber = row.Mobilenumber;
+            row.isValid = mobilenumber && /^\d{10}$/.test(mobilenumber.toString());
             return row;
         });
 
-        const mobileNumbers = processedData.map(employee => employee.Mobilenumber.toString().trim());
+        const mobileNumbers = processedData
+            .map(employee => employee.Mobilenumber)
+            .filter(mn => mn !== undefined)
+            .map(mn => mn.toString().trim());
+
         const seenNumbers = new Set();
         const duplicates = new Set();
         const validEmployees = [];
         const invalidEmployees = [];
 
         for (const employee of processedData) {
-            const mobileNumber = employee.Mobilenumber.toString().trim();
+            const mobileNumber = employee.Mobilenumber ? employee.Mobilenumber.toString().trim() : null;
+
             if (!employee.isValid) {
                 invalidEmployees.push(employee);
+                console.log('Invalid employee due to missing or incorrect mobile number:', employee);
             } else if (seenNumbers.has(mobileNumber)) {
                 duplicates.add(mobileNumber);
                 invalidEmployees.push(employee);
+                console.log('Duplicate employee:', employee);
             } else {
                 seenNumbers.add(mobileNumber);
                 validEmployees.push(employee);
