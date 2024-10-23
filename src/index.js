@@ -6,11 +6,13 @@ const cors = require('cors');
 const PORT = process.env.PORT || 3000;
 const app = express();
 
+// Configure CORS to allow your specific frontend origin
+app.use(cors({
+    origin: 'https://employee-management-system-l5bk.onrender.com' // Replace with your frontend URL
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({
-    origin: 'https://employee-management-system-l5bk.onrender.com'
-}));
 
 // Middleware for logging requests
 app.use((req, res, next) => {
